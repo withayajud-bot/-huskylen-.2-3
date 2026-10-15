@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Futuristic Attendance Dashboard</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #070a12;
+      --card-bg: #0f172a;
+      --card-border: #1e293b;
+      --table-row-bg: #111a2e;
+      --table-row-hover: #1e2942;
+      --accent-purple: #a855f7;
+      --accent-cyan: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Prompt', sans-serif;
+      padding-bottom: 50px;
+    }
+
+    .dashboard-header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+      border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+      padding: 15px 0;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-custom {
+      background: linear-gradient(145deg, #0f172a 0%, #111827 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+    }
+
+    .live-display-card-large {
+      background: linear-gradient(145deg, #131c31 0%, #0b1120 100%);
+      border: 2px solid var(--accent-cyan);
+      border-radius: 24px;
+      padding: 25px 20px;
+      box-shadow: 0 0 35px rgba(6, 182, 212, 0.35);
+      text-align: center;
+      position: sticky;
+      top: 20px;
+    }
+
+    .live-avatar-container {
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto 20px auto;
+    }
+
+    .live-avatar-responsive {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      border-radius: 24px;
+      object-fit: cover;
+      border: 5px solid var(--accent-cyan);
+      box-shadow: 0 0 35px rgba(6, 182, 212, 0.55), inset 0 0 15px rgba(6, 182, 212, 0.3);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .form-control, .form-select {
+      background-color: #0b1120 !important;
+      border: 1px solid #334155 !important;
+      color: var(--text-main) !important;
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent-purple) !important;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.3) !important;
+    }
+
+    .table-custom {
+      color: var(--text-main) !important;
+      vertical-align: middle;
+      border-collapse: separate;
+      border-spacing: 0 6px;
+    }
+
+    .table-custom th {
+      background-color: #0b1120 !important;
+      border: none !important;
+      color: var(--accent-cyan) !important;
+      font-weight: 600;
+      padding: 12px 10px;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    .table-custom tbody tr {
+      background-color: var(--table-row-bg) !important;
+      transition: all 0.25s ease-in-out;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .table-custom tbody tr:hover {
+      background-color: var(--table-row-hover) !important;
+      transform: translateY(-2px);
+    }
+
+    .table-custom td {
+      border: none !important;
+      padding: 10px 8px;
+      color: #e2e8f0 !important;
+      background-color: transparent !important;
+    }
+
+    .student-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent-cyan);
+    }
+
+    .badge-status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-success {
+      background-color: rgba(16, 185, 129, 0.15) !important;
+      color: #34d399 !important;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .badge-danger {
+      background-color: rgba(244, 63, 94, 0.15) !important;
+      color: #fb7185 !important;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-purple {
+      background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+      color: white;
+      border: none;
+      font-weight: 500;
+      border-radius: 8px;
+      padding: 8px 16px;
+    }
+
+    .btn-outline-purple {
+      border: 1px solid var(--accent-purple);
+      color: #c084fc;
+      background: rgba(168, 85, 247, 0.05);
+      border-radius: 8px;
+    }
+
+    .modal-content {
+      background-color: #0f172a;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 16px;
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="dashboard-header">
+    <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+      <div>
+        <h3 class="fw-bold mb-0"><i class="fas fa-user-check text-info me-2"></i>Futuristic Attendance Dashboard</h3>
+      </div>
+      <span class="badge bg-dark border border-purple text-info p-2 fs-6" id="liveClock">⏰ --:--:--</span>
+    </div>
+  </header>
+
+  <div class="container-fluid px-4">
+    <div class="row g-4">
+
+      <!-- ฝั่งซ้าย: จอโชว์รูปขยายใหญ่สมดุล Responsive พร้อมข้อมูลนักเรียนที่สแกนล่าสุด -->
+      <div class="col-lg-5 col-xl-4">
+        <div class="live-display-card-large" id="liveDisplayBox">
+          <span class="badge bg-secondary mb-3 fs-6 p-2 w-100" id="liveDisplayBadge">🟢 ระบบพร้อมรับสแกน</span>
+          
+          <div class="live-avatar-container">
+            <img id="liveDisplayImg" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="live-avatar-responsive">
+          </div>
+
+          <h2 class="fw-bold text-white mb-2" id="liveDisplayName">กรุณายืนตรงหน้ากล้อง...</h2>
+          <h4 class="text-info fw-bold mb-2" id="liveDisplayId">นักเรียน ID: -</h4>
+          <h5 class="text-purple fw-bold mb-3" id="liveDisplayClassInfo">ชั้น: - | เลขที่: -</h5>
+          
+          <div class="p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary text-start">
+            <p class="text-white mb-1"><i class="fas fa-clock text-warning me-2"></i><span id="liveDisplayTime">เวลาสแกนล่าสุด: --:--:-- น.</span></p>
+            <p class="text-white mb-0"><i class="fas fa-info-circle text-cyan me-2"></i><span id="liveDisplayType">สถานะ: รอการสแกน</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ฝั่งขวา: รายการเช็กชื่อนักเรียน และตั้งค่าระบบ -->
+      <div class="col-lg-7 col-xl-8">
+
+        <!-- Card 1: จัดการจำนวนนักเรียน & รีเซ็ตประจำวัน -->
+        <div class="card-custom">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+              <div class="p-3 bg-info bg-opacity-10 text-info rounded-3">
+                <i class="fas fa-users-cog fa-lg"></i>
+              </div>
+              <div>
+                <h5 class="fw-bold mb-0">จัดการจำนวนนักเรียนในระบบ</h5>
+                <small class="text-muted">ปรับเปลี่ยนจำนวนนักเรียนและควบคุมการรีเซ็ตข้อมูลประจำวัน</small>
+              </div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="resetAllAttendance()">
+              <i class="fas fa-undo me-1"></i> 🔄 รีเซ็ตข้อมูลสแกนทั้งหมดประจำวัน
+            </button>
+          </div>
+
+          <div class="row align-items-center g-3">
+            <div class="col-auto">
+              <label class="form-label mb-0">จำนวนนักเรียนทั้งหมด:</label>
+            </div>
+            <div class="col-auto">
+              <input type="number" id="totalStudentCount" class="form-control text-center fw-bold text-info" value="50" style="width: 90px;">
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-purple btn-sm" onclick="updateStudentCount()"><i class="fas fa-sync-alt me-1"></i> อัปเดต</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Discord Report Automation Settings -->
+        <div class="card-custom">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="p-3 bg-purple bg-opacity-10 text-purple rounded-3" style="color: #c084fc;">
+              <i class="fab fa-discord fa-lg"></i>
+            </div>
+            <div>
+              <h5 class="fw-bold mb-0">Discord Report Automation Settings</h5>
+              <small class="text-muted">ตั้งเวลาส่งรายงาน PDF สรุปยอดลง Discord อัตโนมัติ (ตรงเวลาเป๊ะระดับนาที)</small>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label form-label-sm">Google Apps Script Web App URL:</label>
+            <input type="text" id="gasUrl" class="form-control form-control-sm" value="https://script.google.com/macros/s/AKfycbzBcSEmRaPn_8GILXRiB8MGxqbXkajRiBecFvXVmWiiKdHYMpXf08Ynp0PSbVyWFXxu/exec">
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label form-label-sm">⏰ เลือกเวลาส่งรายงานรอบเช้า (สรุปเข้าเรียน):</label>
+              <select id="morningTimeSelect" class="form-select form-select-sm"></select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label form-label-sm">⏰ เลือกเวลาส่งรายงานรอบเย็น (สรุปเลิกเรียน):</label>
+              <select id="eveningTimeSelect" class="form-select form-select-sm"></select>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-purple btn-sm" onclick="saveScheduleSettings()">
+              <i class="fas fa-save me-1"></i> บันทึกเวลา
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="sendPdfNow('morning')">
+              <i class="fas fa-paper-plane me-1"></i> ส่ง PDF เช้าทันที
+            </button>
+            <button class="btn btn-info btn-sm text-white" onclick="sendPdfNow('evening')">
+              <i class="fas fa-paper-plane me-1"></i> ส่ง PDF เย็นทันที
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 3: รายการเช็กชื่อนักเรียน -->
+        <div class="card-custom">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0 text-info"><i class="fas fa-list-ol me-2"></i>รายการเช็กชื่อนักเรียน</h5>
+            <div class="input-group" style="max-width: 250px;">
+              <span class="input-group-text bg-dark border-secondary text-info"><i class="fas fa-search"></i></span>
+              <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="ค้นหา ID/ชื่อ..." onkeyup="filterTable()">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-custom text-center align-middle">
+              <thead>
+                <tr>
+                  <th>รูปโปรไฟล์</th>
+                  <th>ID</th>
+                  <th>ชั้น</th>
+                  <th>เลขที่</th>
+                  <th>ชื่อ - นามสกุล</th>
+                  <th>สแกนเข้า (เช้า)</th>
+                  <th>สแกนออก (เย็น)</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal สำหรับแก้ไขข้อมูลนักเรียน -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-info" id="editModalTitle"><i class="fas fa-user-edit me-2"></i>แก้ไขข้อมูลนักเรียน</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editStudentId">
+          <div class="text-center mb-3">
+            <img id="editImagePreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="student-avatar" style="width: 80px; height: 80px;">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ชื่อ - นามสกุล:</label>
+            <input type="text" id="editStudentName" class="form-control" placeholder="กรอกชื่อ-นามสกุล">
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">ชั้น (เช่น ม.4/1):</label>
+              <input type="text" id="editStudentGrade" class="form-control" placeholder="ม.4/1">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">เลขที่:</label>
+              <input type="number" id="editStudentClassNum" class="form-control" placeholder="1">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">URL รูปภาพโปรไฟล์นักเรียน:</label>
+            <input type="text" id="editStudentPhotoUrl" class="form-control" placeholder="https://example.com/photo.jpg" onchange="updatePhotoPreview()">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">สแกนเข้าเรียน (รอบเช้า):</label>
+            <select id="editTimeInStatus" class="form-select mb-2" onchange="toggleCustomTime('In')">
+              <option value="none">ยังไม่สแกน (ลบเวลาสแกน)</option>
+              <option value="now">เช็กชื่อเข้าเรียนทันที (เวลาปัจจุบัน)</option>
+              <option value="custom">ระบุเวลาสแกนเอง</option>
+            </select>
+            <input type="text" id="editCustomTimeIn" class="form-control d-none" placeholder="เช่น 07:45:00">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">สแกนเลิกเรียน (รอบเย็น):</label>
+            <select id="editTimeOutStatus" class="form-select mb-2" onchange="toggleCustomTime('Out')">
+              <option value="none">ยังไม่สแกน (ลบเวลาสแกน)</option>
+              <option value="now">เช็กชื่อเลิกเรียนทันที (เวลาปัจจุบัน)</option>
+              <option value="custom">ระบุเวลาสแกนเอง</option>
+            </select>
+            <input type="text" id="editCustomTimeOut" class="form-control d-none" placeholder="เช่น 16:30:00">
+          </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-outline-danger btn-sm" onclick="resetSingleStudentFromModal()"><i class="fas fa-trash-alt me-1"></i> ล้างสแกนคนนี้</button>
+          <div>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+            <button type="button" class="btn btn-purple" onclick="saveStudentEdit()"><i class="fas fa-save me-1"></i> บันทึกข้อมูล</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      databaseURL: "https://husky23-9c738-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+    let editModalObj = null;
+    let liveResetTimer = null;
+
+    setInterval(() => {
+      const clockEl = document.getElementById('liveClock');
+      if (clockEl) clockEl.innerText = "⏰ " + new Date().toLocaleTimeString('th-TH');
+    }, 1000);
+
+    function triggerLiveDisplay(studentId, name, grade, classNum, photoUrl, timeStr, isMorning, isDuplicate = false) {
+      const imgEl = document.getElementById('liveDisplayImg');
+      const nameEl = document.getElementById('liveDisplayName');
+      const idEl = document.getElementById('liveDisplayId');
+      const classInfoEl = document.getElementById('liveDisplayClassInfo');
+      const timeEl = document.getElementById('liveDisplayTime');
+      const typeEl = document.getElementById('liveDisplayType');
+      const badgeEl = document.getElementById('liveDisplayBadge');
+
+      imgEl.src = (photoUrl && photoUrl.trim() !== "") ? photoUrl : defaultAvatar;
+      nameEl.innerText = (name && name.trim() !== "") ? name : "นักเรียน ID: " + studentId;
+      idEl.innerText = "นักเรียน ID: " + studentId;
+      classInfoEl.innerText = `ชั้น: ${grade || '-'} | เลขที่: ${classNum || '-'}`;
+      timeEl.innerText = "เวลาสแกนล่าสุด: " + timeStr + " น.";
+
+      if (isDuplicate) {
+        badgeEl.className = "badge bg-warning text-dark mb-3 fs-6 p-2 w-100 fw-bold";
+        badgeEl.innerText = "⚠️ นักเรียนคนนี้สแกนไปแล้ว!";
+        typeEl.innerText = "สถานะ: พยายามสแกนซ้ำซ้อน";
+      } else if (isMorning) {
+        badgeEl.className = "badge bg-success mb-3 fs-6 p-2 w-100";
+        badgeEl.innerText = "🟢 สแกนเข้าเรียนสำเร็จ!";
+        typeEl.innerText = "สถานะ: สแกนเข้าเรียน (เช้า)";
+      } else {
+        badgeEl.className = "badge bg-info mb-3 fs-6 p-2 w-100";
+        badgeEl.innerText = "🔵 สแกนเลิกเรียนสำเร็จ!";
+        typeEl.innerText = "สถานะ: สแกนเลิกเรียน (เย็น)";
+      }
+
+      if (liveResetTimer) clearTimeout(liveResetTimer);
+
+      liveResetTimer = setTimeout(() => {
+        resetLiveDisplayBox();
+      }, 6000);
+    }
+
+    function resetLiveDisplayBox() {
+      document.getElementById('liveDisplayImg').src = defaultAvatar;
+      document.getElementById('liveDisplayName').innerText = "กรุณายืนตรงหน้ากล้อง...";
+      document.getElementById('liveDisplayId').innerText = "นักเรียน ID: -";
+      document.getElementById('liveDisplayClassInfo').innerText = "ชั้น: - | เลขที่: -";
+      document.getElementById('liveDisplayTime').innerText = "เวลาสแกนล่าสุด: --:--:-- น.";
+      document.getElementById('liveDisplayType').innerText = "สถานะ: รอการสแกน";
+      const badgeEl = document.getElementById('liveDisplayBadge');
+      badgeEl.className = "badge bg-secondary mb-3 fs-6 p-2 w-100";
+      badgeEl.innerText = "🟢 ระบบพร้อมรับสแกน";
+    }
+
+    function generateMinuteOptions() {
+      const morningSelect = document.getElementById('morningTimeSelect');
+      const eveningSelect = document.getElementById('eveningTimeSelect');
+      if (!morningSelect || !eveningSelect) return;
+
+      morningSelect.innerHTML = '';
+      eveningSelect.innerHTML = '';
+
+      const fragmentMorning = document.createDocumentFragment();
+      const fragmentEvening = document.createDocumentFragment();
+
+      for (let hour = 0; hour <= 23; hour++) {
+        for (let minute = 0; minute < 60; minute++) {
+          const formattedHour = String(hour).padStart(2, '0');
+          const formattedMinute = String(minute).padStart(2, '0');
+          const timeValue = `${formattedHour}:${formattedMinute}`;
+          const timeText = `${timeValue} น.`;
+
+          const optMorning = new Option(timeText, timeValue);
+          if (timeValue === "08:30") optMorning.selected = true;
+          fragmentMorning.appendChild(optMorning);
+
+          const optEvening = new Option(timeText, timeValue);
+          if (timeValue === "16:30") optEvening.selected = true;
+          fragmentEvening.appendChild(optEvening);
+        }
+      }
+
+      morningSelect.appendChild(fragmentMorning);
+      eveningSelect.appendChild(fragmentEvening);
+    }
+
+    let currentTotalStudents = 50;
+
+    function renderStudents(count) {
+      const tbody = document.getElementById('studentTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      for (let i = 1; i <= count; i++) {
+        const tr = document.createElement('tr');
+        tr.id = `row-ID_${i}`;
+        tr.innerHTML = `
+          <td><img id="img-ID_${i}" src="${defaultAvatar}" class="student-avatar"></td>
+          <td><span class="fw-bold text-info">${i}</span></td>
+          <td id="grade-ID_${i}" class="text-muted">-</td>
+          <td id="classNum-ID_${i}" class="text-muted">-</td>
+          <td id="name-ID_${i}" class="text-muted">ยังไม่ระบุชื่อ</td>
+          <td id="timeIn-ID_${i}"><span class="badge-status badge-danger"><i class="fas fa-times-circle"></i> ยังไม่สแกน</span></td>
+          <td id="timeOut-ID_${i}"><span class="badge-status badge-danger"><i class="fas fa-times-circle"></i> ยังไม่สแกน</span></td>
+          <td>
+            <div class="d-flex justify-content-center gap-1">
+              <button class="btn btn-sm btn-outline-purple" onclick="openEditModal(${i})">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="resetSingleStudentDirect(${i})">
+                <i class="fas fa-undo"></i> ล้าง
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function updateStudentRow(rawKey, studentData) {
+      if (!studentData) return;
+      
+      const match = String(rawKey).match(/\d+/);
+      if (!match) return;
+      const studentId = match[0];
+
+      const imgEl = document.getElementById(`img-ID_${studentId}`);
+      const nameEl = document.getElementById(`name-ID_${studentId}`);
+      const gradeEl = document.getElementById(`grade-ID_${studentId}`);
+      const classNumEl = document.getElementById(`classNum-ID_${studentId}`);
+      const timeInEl = document.getElementById(`timeIn-ID_${studentId}`);
+      const timeOutEl = document.getElementById(`timeOut-ID_${studentId}`);
+
+      if (imgEl) {
+        imgEl.src = (studentData.photo_url && studentData.photo_url.trim() !== "") ? studentData.photo_url : defaultAvatar;
+      }
+
+      if (nameEl && studentData.name && studentData.name !== "") {
+        nameEl.innerText = studentData.name;
+        nameEl.classList.remove('text-muted');
+        nameEl.classList.add('fw-bold', 'text-white');
+      }
+
+      if (gradeEl) gradeEl.innerText = studentData.grade || "-";
+      if (classNumEl) classNumEl.innerText = studentData.class_number || "-";
+
+      let hasTimeIn = (studentData.time_in && studentData.time_in !== "-" && studentData.time_in !== "null");
+      let hasTimeOut = (studentData.time_out && studentData.time_out !== "-" && studentData.time_out !== "null");
+
+      if (timeInEl) {
+        if (hasTimeIn) {
+          timeInEl.innerHTML = `<span class="badge-status badge-success"><i class="fas fa-check-circle"></i> ${studentData.time_in} น.</span>`;
+        } else {
+          timeInEl.innerHTML = `<span class="badge-status badge-danger"><i class="fas fa-times-circle"></i> ยังไม่สแกน</span>`;
+        }
+      }
+
+      if (timeOutEl) {
+        if (hasTimeOut) {
+          timeOutEl.innerHTML = `<span class="badge-status badge-success"><i class="fas fa-check-circle"></i> ${studentData.time_out} น.</span>`;
+        } else {
+          timeOutEl.innerHTML = `<span class="badge-status badge-danger"><i class="fas fa-times-circle"></i> ยังไม่สแกน</span>`;
+        }
+      }
+    }
+
+    function listenToFirebase() {
+      db.ref('/students').once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          Object.keys(data).forEach(key => updateStudentRow(key, data[key]));
+        }
+      });
+
+      db.ref('/students').on('child_changed', (snapshot) => {
+        const studentData = snapshot.val();
+        const rawKey = snapshot.key;
+        const match = String(rawKey).match(/\d+/);
+        if (!match || !studentData) return;
+        const studentId = match[0];
+
+        updateStudentRow(rawKey, studentData);
+
+        let hasTimeIn = (studentData.time_in && studentData.time_in !== "-" && studentData.time_in !== "null");
+        let hasTimeOut = (studentData.time_out && studentData.time_out !== "-" && studentData.time_out !== "null");
+
+        if (hasTimeIn || hasTimeOut) {
+          let scanTime = hasTimeOut ? studentData.time_out : studentData.time_in;
+          let isMorning = !hasTimeOut;
+          triggerLiveDisplay(studentId, studentData.name, studentData.grade, studentData.class_number, studentData.photo_url, scanTime, isMorning, false);
+        }
+      });
+
+      // ปรับปรุงฟังก์ชันรับการแจ้งเตือนสแกนซ้ำ ให้ดึงข้อมูลรูป ชื่อ ชั้น มาโชว์ที่จอใหญ่ครบถ้วน
+      db.ref('/system/duplicate_alert').on('value', (snapshot) => {
+        const alertData = snapshot.val();
+        if (!alertData || !alertData.id) return;
+
+        const studentId = alertData.id;
+        db.ref(`/students/ID_${studentId}`).once('value', (stSnap) => {
+          const stData = stSnap.val() || {};
+          let scanTime = alertData.time || "ก่อนหน้านี้";
+          triggerLiveDisplay(
+            studentId, 
+            stData.name, 
+            stData.grade, 
+            stData.class_number, 
+            stData.photo_url, 
+            scanTime, 
+            true, 
+            true
+          );
+        });
+      });
+
+      db.ref('/system/schedule').once('value', (snapshot) => {
+        const sch = snapshot.val();
+        if (sch) {
+          if (sch.morning) document.getElementById('morningTimeSelect').value = sch.morning;
+          if (sch.evening) document.getElementById('eveningTimeSelect').value = sch.evening;
+        }
+      });
+    }
+
+    function openEditModal(studentId) {
+      document.getElementById('editStudentId').value = studentId;
+      document.getElementById('editModalTitle').innerText = `✏️ แก้ไขข้อมูลนักเรียน ID: ${studentId}`;
+      
+      const nameEl = document.getElementById(`name-ID_${studentId}`);
+      const gradeEl = document.getElementById(`grade-ID_${studentId}`);
+      const classNumEl = document.getElementById(`classNum-ID_${studentId}`);
+      const imgEl = document.getElementById(`img-ID_${studentId}`);
+
+      document.getElementById('editStudentName').value = (nameEl.innerText !== "ยังไม่ระบุชื่อ") ? nameEl.innerText : "";
+      document.getElementById('editStudentGrade').value = (gradeEl.innerText !== "-") ? gradeEl.innerText : "";
+      document.getElementById('editStudentClassNum').value = (classNumEl.innerText !== "-") ? classNumEl.innerText : "";
+      document.getElementById('editStudentPhotoUrl').value = (imgEl.src !== defaultAvatar) ? imgEl.src : "";
+      document.getElementById('editImagePreview').src = imgEl.src;
+
+      document.getElementById('editTimeInStatus').value = "none";
+      document.getElementById('editTimeOutStatus').value = "none";
+      toggleCustomTime('In');
+      toggleCustomTime('Out');
+
+      if (!editModalObj) {
+        editModalObj = new bootstrap.Modal(document.getElementById('editModal'));
+      }
+      editModalObj.show();
+    }
+
+    function updatePhotoPreview() {
+      const url = document.getElementById('editStudentPhotoUrl').value.trim();
+      document.getElementById('editImagePreview').src = url !== "" ? url : defaultAvatar;
+    }
+
+    function toggleCustomTime(type) {
+      const statusSelect = document.getElementById(`editTime${type}Status`);
+      const customInput = document.getElementById(`editCustomTime${type}`);
+      if (statusSelect.value === 'custom') {
+        customInput.classList.remove('d-none');
+      } else {
+        customInput.classList.add('d-none');
+      }
+    }
+
+    async function saveStudentEdit() {
+      const studentId = document.getElementById('editStudentId').value;
+      const newName = document.getElementById('editStudentName').value.trim();
+      const grade = document.getElementById('editStudentGrade').value.trim();
+      const classNum = document.getElementById('editStudentClassNum').value.trim();
+      const photoUrl = document.getElementById('editStudentPhotoUrl').value.trim();
+      const timeInChoice = document.getElementById('editTimeInStatus').value;
+      const timeOutChoice = document.getElementById('editTimeOutStatus').value;
+
+      const currentTime = new Date().toLocaleTimeString('th-TH');
+
+      let updateData = {};
+      if (newName !== "") updateData.name = newName;
+      if (grade !== "") updateData.grade = grade;
+      if (classNum !== "") updateData.class_number = classNum;
+      if (photoUrl !== "") updateData.photo_url = photoUrl;
+
+      if (timeInChoice === 'now') updateData.time_in = currentTime;
+      else if (timeInChoice === 'none') updateData.time_in = "-";
+      else if (timeInChoice === 'custom') {
+        const val = document.getElementById('editCustomTimeIn').value.trim();
+        updateData.time_in = val !== "" ? val : currentTime;
+      }
+
+      if (timeOutChoice === 'now') updateData.time_out = currentTime;
+      else if (timeOutChoice === 'none') updateData.time_out = "-";
+      else if (timeOutChoice === 'custom') {
+        const val = document.getElementById('editCustomTimeOut').value.trim();
+        updateData.time_out = val !== "" ? val : currentTime;
+      }
+
+      await db.ref(`/students/ID_${studentId}`).update(updateData);
+      await db.ref(`/daily_logs/ID_${studentId}`).update(updateData);
+
+      editModalObj.hide();
+      alert(`✅ อัปเดตข้อมูลนักเรียน ID: ${studentId} เรียบร้อยแล้ว`);
+    }
+
+    async function resetSingleStudentDirect(studentId) {
+      if (confirm(`คุณต้องการล้างเวลาสแกนเข้า-ออกของ นักเรียน ID: ${studentId} ใช่หรือไม่?`)) {
+        try {
+          const resetPayload = {
+            time_in: "-",
+            time_out: "-"
+          };
+
+          await db.ref(`/students/ID_${studentId}`).update(resetPayload);
+          await db.ref(`/daily_logs/ID_${studentId}`).update(resetPayload);
+
+          const timeInEl = document.getElementById(`timeIn-ID_${studentId}`);
+          const timeOutEl = document.getElementById(`timeOut-ID_${studentId}`);
+          if (timeInEl) timeInEl.innerHTML = `<span class="badge-status badge-danger"><i class="fas fa-times-circle"></i> ยังไม่สแกน</span>`;
+          if (timeOutEl) timeOutEl.innerHTML = `<span class="badge-status badge-danger"><i class="fas fa-times-circle"></i> ยังไม่สแกน</span>`;
+
+          resetLiveDisplayBox();
+          alert(`🧹 ล้างเวลาสแกนของนักเรียน ID: ${studentId} เรียบร้อยแล้ว`);
+        } catch (err) {
+          console.error(err);
+          alert("❌ เกิดข้อผิดพลาดในการล้างข้อมูล: " + err.message);
+        }
+      }
+    }
+
+    async function resetSingleStudentFromModal() {
+      const studentId = document.getElementById('editStudentId').value;
+      await resetSingleStudentDirect(studentId);
+      if (editModalObj) editModalObj.hide();
+    }
+
+    async function resetAllAttendance() {
+      if (confirm("⚠️ คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตล้างเวลาสแกนของนักเรียนทุกคนประจำวัน? (ข้อมูลรูปและชื่อยังคงอยู่)")) {
+        const updates = {};
+        for (let i = 1; i <= currentTotalStudents; i++) {
+          updates[`/students/ID_${i}/time_in`] = "-";
+          updates[`/students/ID_${i}/time_out`] = "-";
+          updates[`/daily_logs/ID_${i}/time_in`] = "-";
+          updates[`/daily_logs/ID_${i}/time_out`] = "-";
+        }
+        updates['/system/reset_trigger'] = true;
+        updates['/system/duplicate_alert'] = null;
+
+        await db.ref().update(updates);
+        resetLiveDisplayBox();
+        alert("🔄 รีเซ็ตข้อมูลสแกนเข้า-ออกของนักเรียนทุกคน และเคลียร์บอร์ด ESP32 เรียบร้อยแล้ว!");
+      }
+    }
+
+    function updateStudentCount() {
+      const countInput = document.getElementById('totalStudentCount');
+      if (!countInput) return;
+      const count = parseInt(countInput.value);
+      if (count > 0) {
+        currentTotalStudents = count;
+        renderStudents(count);
+        listenToFirebase();
+        alert(`อัปเดตจำนวนนักเรียนเป็น ${count} คน เรียบร้อยแล้ว`);
+      }
+    }
+
+    function filterTable() {
+      const input = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('#studentTableBody tr');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? '' : 'none';
+      });
+    }
+
+    async function saveScheduleSettings() {
+      const gasUrl = document.getElementById('gasUrl').value.trim();
+      const morningTime = document.getElementById('morningTimeSelect').value;
+      const eveningTime = document.getElementById('eveningTimeSelect').value;
+
+      if (!gasUrl || !gasUrl.endsWith('/exec')) {
+        alert("กรุณากรอก Google Apps Script Web App URL ที่ถูกต้องก่อนครับ");
+        return;
+      }
+
+      try {
+        await db.ref('/system/schedule').set({
+          morning: morningTime,
+          evening: eveningTime
+        });
+
+        alert("✅ บันทึกเวลาส่งรายงานอัตโนมัติเป๊ะๆ (" + morningTime + " น. และ " + eveningTime + " น.) เรียบร้อยแล้ว!");
+      } catch (err) {
+        console.error(err);
+        alert("❌ เกิดข้อผิดพลาดในการบันทึกเวลา");
+      }
+    }
+
+    async function sendPdfNow(type) {
+      const gasUrl = document.getElementById('gasUrl').value.trim();
+
+      if (!gasUrl || !gasUrl.endsWith('/exec')) {
+        alert("กรุณากรอก Google Apps Script Web App URL ที่ถูกต้องก่อนครับ");
+        return;
+      }
+
+      const reportTypeName = (type === 'morning') ? 'รอบเช้า' : 'รอบเย็น';
+
+      try {
+        await fetch(gasUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            action: "sendNow",
+            reportType: type
+          })
+        });
+
+        alert("🚀 สั่งส่งรายงาน " + reportTypeName + " เข้า Discord เรียบร้อยแล้ว!");
+      } catch (err) {
+        console.error(err);
+        alert("❌ เกิดข้อผิดพลาดในการสั่งส่งรายงาน");
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      generateMinuteOptions();
+      renderStudents(currentTotalStudents);
+      listenToFirebase();
+    });
+  </script>
+</body>
+</html>
